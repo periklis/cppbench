@@ -1,3 +1,4 @@
 .projectile
 .vagrant/
+bin/*
 build/*

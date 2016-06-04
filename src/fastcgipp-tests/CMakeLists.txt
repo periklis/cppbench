@@ -19,6 +19,6 @@ add_executable(hellofcgipp.fcgi hellofcgipp.cpp)
 add_dependencies(hellofcgipp.fcgi fastcgipp)
 target_link_libraries(hellofcgipp.fcgi PRIVATE fastcgipp)
 
-install(FILES hellofcgipp.fcgi
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/hellofcgipp.fcgi"
   PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE
   DESTINATION "${PROJECT_SOURCE_DIR}/../../bin")

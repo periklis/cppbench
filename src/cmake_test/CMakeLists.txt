@@ -12,6 +12,6 @@ if(UNIX)
 endif()
 
 add_executable(cmake_test main.cpp)
-install(TARGET cmake_test
+install(TARGETS cmake_test
   PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE
   DESTINATION "${PROJECT_SOURCE_DIR}/../../bin")

@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.8)
-project (Cmake_tests CXX)
+project (Cmake_tests LANGUAGES CXX)
 
 # Set compile flags for gcc and clang
 if(UNIX)

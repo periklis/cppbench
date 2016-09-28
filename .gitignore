@@ -1,4 +1,6 @@
+.dir-locals.el
 .projectile
 .vagrant/
 bin/*
 build/*
+TAGS

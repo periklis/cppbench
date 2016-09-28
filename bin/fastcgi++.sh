@@ -2,7 +2,7 @@
 BIND=127.0.0.1:9000
 USER=www-data
 
-FCGIPP_CGI=/vagrant/build/fastcgi++build/helloworld.fcgi
+FCGIPP_CGI=$1
 FCGIPP_CGI_NAME=`basename $FCGIPP_CGI`
 FCGIPP_CGI_ARGS="- USER=$USER PATH=/usr/bin $FCGIPP_CGI"
 RETVAL=0
@@ -21,7 +21,7 @@ stop() {
       echo "$FCGIPP_CGI_NAME."
 }
 
-case "$1" in
+case "$2" in
     start)
       start
   ;;

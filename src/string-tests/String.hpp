@@ -1,6 +1,7 @@
 // -*-c++-*-
 #include <algorithm>
 #include <stdexcept>
+#include <string>
 
 #ifndef STRING_H_
 #define STRING_H_

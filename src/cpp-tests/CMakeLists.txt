@@ -15,13 +15,13 @@ include_directories(
   "${CMAKE_CURRENT_BINARY_DIR}"
   "${CMAKE_CURRENT_SOURCE_DIR}")
 
-
 add_executable(assertions assertions.cpp)
 add_executable(class_types class_types.cpp)
 add_executable(compile_time_polymorphism compile_time_polymorphism.cpp)
 add_executable(copy_semantics copy_semantics.cpp)
 add_executable(exception_quarantees exception_quarantees.cpp)
 add_executable(init_procedures init_procedures.cpp)
+add_executable(metaprogramming metaprogramming.cpp)
 add_executable(move_semantics move_semantics.cpp)
 add_executable(operators operators.cpp)
 add_executable(runtime_polymorphism runtime_polymorphism.cpp)

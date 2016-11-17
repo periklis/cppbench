@@ -3,8 +3,6 @@ project (CPPBench LANGUAGES CXX)
 
 enable_testing()
 
-add_subdirectory("${PROJECT_SOURCE_DIR}/lib/fastcgi++")
 add_subdirectory("${PROJECT_SOURCE_DIR}/src/cmake-tests")
 add_subdirectory("${PROJECT_SOURCE_DIR}/src/cpp-tests")
-add_subdirectory("${PROJECT_SOURCE_DIR}/src/fastcgipp-tests")
 add_subdirectory("${PROJECT_SOURCE_DIR}/src/string-tests")

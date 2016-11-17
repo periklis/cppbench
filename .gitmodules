@@ -1,3 +1,0 @@
-[submodule "lib/fastcgi++"]
-	path = lib/fastcgi++
-	url = https://github.com/eddic/fastcgipp.git

@@ -1,3 +1,5 @@
+// -*-c++-*-
+
 #ifndef INIT_PROCEDURES_H_
 #define INIT_PROCEDURES_H_
 

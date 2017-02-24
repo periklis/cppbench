@@ -1,6 +1,7 @@
 #include <iostream>
 #include "gtest/gtest.h"
 #include "vector.hpp"
+#include "vector_test_main.hpp"
 
 /*
   TESTS FOR DEFAULT CONSTRUCTION
@@ -11,7 +12,7 @@ class vector_default_construct_test
 
  public:
   vector_default_construct_test()
-      :vec{new cppbench::containers::vector<T>()} {}
+      : vec{new cppbench::containers::vector<T>()} {}
 
   ~vector_default_construct_test() {
     delete vec;
@@ -53,15 +54,8 @@ REGISTER_TYPED_TEST_CASE_P(
     vector_default_ctor,
     vector_default_typedefs);
 
-typedef ::testing::Types<
-  bool,
-  short int, int, long int, long long int,
-  unsigned short int, unsigned int, unsigned long int, unsigned long long int,
-  char, signed char, unsigned char, char16_t, char32_t, wchar_t,
-  float, double, long double,
-  int*, long*, long long*, char*, float*, double*, long double*,
-  std::string, std::wstring> VectorTypes;
-INSTANTIATE_TYPED_TEST_CASE_P(vector, vector_default_construct_test, VectorTypes);
+INSTANTIATE_TYPED_TEST_CASE_P(vector_value_types, vector_default_construct_test, VectorValueTypes);
+INSTANTIATE_TYPED_TEST_CASE_P(vector_pointer_types, vector_default_construct_test, VectorPointerTypes);
 
 /*
 

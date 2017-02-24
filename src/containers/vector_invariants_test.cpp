@@ -33,9 +33,22 @@ TEST_P(vector_invariants_test, vector_begin_iter)
   EXPECT_EQ(vec_value, *vec->begin());
 }
 
+TEST_P(vector_invariants_test, vector_reverse_begin_iter)
+{
+  EXPECT_EQ(vec_value, *vec->rbegin());
+  EXPECT_EQ(*(vec->end()-1), *vec->rbegin());
+  EXPECT_EQ(vec->end(), vec->rbegin().base());
+}
+
 TEST_P(vector_invariants_test, vector_end_iter)
 {
   EXPECT_EQ((vec->begin() + vec_size), vec->end());
+}
+
+TEST_P(vector_invariants_test, vector_reverse_end_iter)
+{
+  EXPECT_EQ((vec->rbegin() + vec_size), vec->rend());
+  EXPECT_EQ(vec->begin(), vec->rend().base());
 }
 
 TEST_P(vector_invariants_test, vector_size)

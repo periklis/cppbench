@@ -2,7 +2,14 @@
 #define VECTOR_H_
 
 #include <algorithm>
+#include <iterator>
 
+/*
+ * TODO: Refactor constructor duplicate code
+ * TODO: Add constructor for std::initializer_list<T>
+ * TODO: Implement insert, emplace, erase
+ * TODO: Evaluate and refactor typed testes vs. param tests
+ */
 namespace cppbench {
 namespace containers {
 
@@ -10,14 +17,16 @@ template<typename T>
 class vector {
 
  public:
-  typedef T              value_type;
-  typedef T&             reference;
-  typedef const T&       const_reference;
-  typedef int            size_type;
-  typedef T*             iterator;
-  typedef const T*       const_iterator;
-  typedef iterator       pointer;
-  typedef const_iterator const_pointer;
+  typedef T                                     value_type;
+  typedef T&                                    reference;
+  typedef const T&                              const_reference;
+  typedef int                                   size_type;
+  typedef T*                                    iterator;
+  typedef const T*                              const_iterator;
+  typedef std::reverse_iterator<iterator>       reverse_iterator;
+  typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+  typedef iterator                              pointer;
+  typedef const_iterator                        const_pointer;
 
   vector() {}
 
@@ -87,9 +96,14 @@ class vector {
   }
 
   iterator begin() { return begin_; }
-  const_iterator begin() const { return begin_;}
+  const_iterator cbegin() const { return begin_;}
   iterator end() { return end_; }
-  const_iterator end() const { return end_; }
+  const_iterator cend() const { return end_; }
+
+  reverse_iterator rbegin() { return reverse_iterator(end_); }
+  const_reverse_iterator crbegin() const { return reverse_iterator(end_);}
+  reverse_iterator rend() { return reverse_iterator(begin_); }
+  const_reverse_iterator crend() const { return reverse_iterator(begin_); }
 
   size_type size() const { return static_cast<size_type>(end_ - begin_); }
   size_type max_size() const { return std::numeric_limits<size_type>::max(); };
@@ -189,7 +203,7 @@ class vector {
 
 template<typename T>
 std::ostream& operator<<(std::ostream& os, const vector<T>& v) {
-  std::copy(v.begin(), v.end(), std::ostream_iterator<T>(os, ", "));
+  std::copy(v.cbegin(), v.cend(), std::ostream_iterator<T>(os, ", "));
   return os;
 }
 

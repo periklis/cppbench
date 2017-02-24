@@ -126,7 +126,7 @@ class vector {
   {
     size_type n = this->size();
 
-    if(cap_ != end_ && n > 1) {
+    if(cap_ != end_) {
       auto nbuf = std::make_unique<value_type[]>(n);
       std::copy(begin_, end_, &nbuf[0]);
 

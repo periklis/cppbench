@@ -1,3 +1,4 @@
+#include <random>
 #include "gtest/gtest.h"
 #include "vector.hpp"
 
@@ -9,6 +10,7 @@ class vector_mutate_test
     vec_size = ::testing::get<0>(GetParam());
     vec_value = ::testing::get<1>(GetParam());
     vec = new cppbench::containers::vector<int>(vec_size, vec_value);
+    std::generate_n(vec->begin(), vec_size, std::rand);
   }
 
   virtual ~vector_mutate_test() {
@@ -76,44 +78,15 @@ TEST_P(vector_mutate_test, vector_reserve_above_max_size) {
   EXPECT_THROW(vec->reserve(std::numeric_limits<sizeT>::max()+1), std::length_error);
 }
 
+TEST_P(vector_mutate_test, vector_shrink_to_fit) {
+  vec->shrink_to_fit();
+  EXPECT_EQ(vec->size(), vec->capacity());
+  EXPECT_EQ(vec_size, vec->size());
+}
+
 INSTANTIATE_TEST_CASE_P(
     vector,
     vector_mutate_test,
     ::testing::Combine(
          ::testing::Range(1, 10, 1),
-         ::testing::Values(10)));
-
-
-class vector_shrink_test
-    : public ::testing::TestWithParam< ::testing::tuple<int,int> > {
-
- public:
-  vector_shrink_test() {
-    vec_size = ::testing::get<0>(GetParam());
-    vec_value = ::testing::get<1>(GetParam());
-    vec = new cppbench::containers::vector<int>(vec_size, vec_value);
-  }
-
-  virtual ~vector_shrink_test() {
-    delete vec;
-    vec = nullptr;
-  }
-
-  int vec_value;
-  int vec_size;
-  cppbench::containers::vector<int>* vec;
-};
-
-TEST_P(vector_shrink_test, vector_shrink_to_fit) {
-  vec->shrink_to_fit();
-  EXPECT_EQ(vec->size(), vec->capacity());
-  EXPECT_EQ(vec_size, vec->size());
-  EXPECT_EQ(vec_value, vec->back());
-}
-
-INSTANTIATE_TEST_CASE_P(
-    vector,
-    vector_shrink_test,
-    ::testing::Combine(
-         ::testing::Range(10, 11, 1),
          ::testing::Values(10)));

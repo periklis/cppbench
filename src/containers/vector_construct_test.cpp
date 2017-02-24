@@ -127,22 +127,14 @@ TEST_P(vector_construct_with_value_test, size_and_def_val_ctor) {
     }, &vec, vec_value);
 }
 
-INSTANTIATE_TEST_CASE_P(
-    vector,
-    vector_construct_with_value_test,
-    ::testing::Combine(
-         ::testing::Range(1, 10, 1),
-         ::testing::Values(10)));
+
 
 /*
   TESTS FOR COPY CONSTRUCTION
  */
 
-class vector_copy_construct_test
-    : public vector_construct_with_value_test {
-};
 
-TEST_P(vector_copy_construct_test, vector_copy_ctor) {
+TEST_P(vector_construct_with_value_test, vector_copy_ctor) {
   auto vec_copy(*vec);
 
   EXPECT_EQ(vec_size, vec_copy.size());
@@ -154,7 +146,7 @@ TEST_P(vector_copy_construct_test, vector_copy_ctor) {
     }, vec_copy, &vec);
 }
 
-TEST_P(vector_copy_construct_test, vector_copy_assigment) {
+TEST_P(vector_construct_with_value_test, vector_copy_assigment) {
   auto vec_copy = *vec;
 
   EXPECT_EQ(vec_size, vec_copy.size());
@@ -166,23 +158,11 @@ TEST_P(vector_copy_construct_test, vector_copy_assigment) {
     }, vec_copy, &vec);
 }
 
-INSTANTIATE_TEST_CASE_P(
-    vector,
-    vector_copy_construct_test,
-    ::testing::Combine(
-         ::testing::Range(1, 3, 1),
-         ::testing::Values(10)));
-
-
 /*
   TESTS FOR COPY CONSTRUCTION
  */
 
-class vector_move_construct_test
-    : public vector_construct_with_value_test {
-};
-
-TEST_P(vector_move_construct_test, vector_move_ctor) {
+TEST_P(vector_construct_with_value_test, vector_move_ctor) {
   auto vec_moved_to(std::move(*vec));
 
   EXPECT_EQ(vec_size, vec_moved_to.size());
@@ -202,7 +182,7 @@ TEST_P(vector_move_construct_test, vector_move_ctor) {
     }, vec_moved_to, vec_value);
 }
 
-TEST_P(vector_move_construct_test, vector_move_assigment) {
+TEST_P(vector_construct_with_value_test, vector_move_assigment) {
   auto vec_moved_to = std::move(*vec);
 
   EXPECT_EQ(vec_size, vec_moved_to.size());
@@ -222,13 +202,13 @@ TEST_P(vector_move_construct_test, vector_move_assigment) {
     }, vec_moved_to, vec_value);
 }
 
-TEST_P(vector_move_construct_test, vector_move_with_swap_by_adl) {
+TEST_P(vector_construct_with_value_test, vector_move_with_swap_by_adl) {
   using std::swap;
 
-  cppbench::containers::vector<int> vc {3, vec_value};
+  cppbench::containers::vector<int> vc {vec_size, vec_value};
   swap(vc, *vec);
 
-  EXPECT_EQ(3, vec->size());
+  EXPECT_EQ(vec_size, vec->size());
   EXPECT_EQ(vec_size, vc.size());
 
   EXPECT_PRED2([] (auto lhs, auto rhs) {
@@ -236,9 +216,10 @@ TEST_P(vector_move_construct_test, vector_move_with_swap_by_adl) {
     }, vc, &vec);
 }
 
+
 INSTANTIATE_TEST_CASE_P(
     vector,
-    vector_move_construct_test,
+    vector_construct_with_value_test,
     ::testing::Combine(
-         ::testing::Range(1, 3, 1),
+         ::testing::Range(1, 10, 1),
          ::testing::Values(10)));

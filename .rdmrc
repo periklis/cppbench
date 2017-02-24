@@ -1,0 +1,4 @@
+--isystem /Users/periklis/.nix-profile/include
+--isystem /Users/periklis/.nix-profile/include/c++/v1
+--isystem /Users/periklis/Projects/periklis/cppbench/build/lib/googletest/src/googlemock/include
+--isystem /Users/periklis/Projects/periklis/cppbench/build/lib/googletest/src/googletest/include

@@ -2,82 +2,106 @@
 #define VECTOR_H_
 
 #include <algorithm>
+#include <initializer_list>
 #include <iterator>
 
 /*
- * TODO: Refactor constructor duplicate code
- * TODO: Add constructor for std::initializer_list<T>
+ * TODO: Separate allocation policy between stack and free store through extra type parameter
  * TODO: Implement insert, emplace, erase
- * TODO: Evaluate and refactor typed testes vs. param tests
  */
 namespace cppbench {
 namespace containers {
 
 template<typename T>
-class vector {
-
+class vector_base  {
  public:
-  typedef T                                     value_type;
-  typedef T&                                    reference;
-  typedef const T&                              const_reference;
-  typedef int                                   size_type;
-  typedef T*                                    iterator;
-  typedef const T*                              const_iterator;
-  typedef std::reverse_iterator<iterator>       reverse_iterator;
-  typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
-  typedef iterator                              pointer;
-  typedef const_iterator                        const_pointer;
+  typedef T              value_type;
+  typedef int            size_type;
+  typedef T&             reference;
+  typedef const T&       const_reference;
+  typedef T*             iterator;
+  typedef const T*       const_iterator;
+  typedef iterator       pointer;
+  typedef const_iterator const_pointer;
 
-  vector() {}
+  vector_base() {}
 
-  explicit vector(size_type n)
+  explicit vector_base(size_type n)
       : buf_{n > 0 ? new value_type[2*n] : nullptr},
         begin_{buf_},
         end_{buf_ + n},
         cap_{buf_ + 2*n}
-  {
-    std::fill(begin_, end_, value_type{});
-  }
+  {}
 
-  vector(size_type n, value_type& v)
-      : buf_{n > 0 ? new value_type[2*n] : nullptr},
-        begin_{buf_},
-        end_{buf_ + n},
-        cap_{buf_ + 2*n}
+  template<typename ValueT>
+  vector_base(size_type n, ValueT&& v)
+      : vector_base(n)
   {
     std::fill(begin_, end_, v);
   }
 
-  vector(iterator begin, iterator end)
-      : buf_{(end-begin) > 0 ? new value_type[2*(end-begin)] : nullptr},
-        begin_{buf_},
-        end_{buf_ + (end-begin)},
-        cap_{buf_ + 2*(end-begin)}
+  virtual ~vector_base()
   {
-    std::copy(begin, end, begin_);
+    if (buf_ != nullptr){
+      delete[] buf_;
+      buf_ = begin_ = end_ = cap_ = nullptr;
+    }
   }
 
-  vector(const vector& v)
-      : buf_{v.size() > 0 ? new value_type[2*v.size()] : nullptr},
-        begin_{buf_},
-        end_{buf_ + v.size()},
-        cap_{buf_ + 2*v.size()}
+ protected:
+  pointer buf_ {nullptr};
+  pointer begin_ {nullptr};
+  pointer end_ {nullptr};
+  pointer cap_ {nullptr};
+};
+
+
+template<typename T>
+class vector
+    : private vector_base<T> {
+
+ private:
+  typedef vector_base<T> vector_base;
+
+ public:
+  typedef typename vector_base::value_type      value_type;
+  typedef typename vector_base::reference       reference;
+  typedef typename vector_base::const_reference const_reference;
+  typedef typename vector_base::size_type       size_type;
+  typedef typename vector_base::iterator        iterator;
+  typedef typename vector_base::const_iterator  const_iterator;
+  typedef std::reverse_iterator<iterator>       reverse_iterator;
+  typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+  typedef typename vector_base::pointer         pointer;
+  typedef typename vector_base::const_pointer   const_pointer;
+
+  vector() {}
+
+  explicit vector(size_type n)
+      : vector_base(n, value_type{}) {}
+
+  vector(size_type n, value_type& v)
+      : vector_base(n, v) {}
+
+  vector(iterator begin, iterator end)
+      : vector_base(std::distance(begin, end))
   {
-    std::copy(v.begin_, v.end_, begin_);
+    std::copy(begin, end, this->begin_);
+  }
+
+  vector(std::initializer_list<T> l)
+      : vector(const_cast<iterator>(l.begin()), const_cast<iterator>(l.end())) {}
+
+  vector(const vector& v)
+      : vector_base(v.size())
+  {
+    std::copy(v.begin_, v.end_, this->begin_);
   }
 
   vector(vector&& v)
       : vector()
   {
     swap(*this, v);
-  }
-
-  ~vector()
-  {
-    if (buf_ != nullptr){
-      delete[] buf_;
-      buf_ = begin_ = end_ = cap_ = nullptr;
-    }
   }
 
   vector& operator=(vector v)
@@ -95,20 +119,20 @@ class vector {
     return *this;
   }
 
-  iterator begin() { return begin_; }
-  const_iterator cbegin() const { return begin_;}
-  iterator end() { return end_; }
-  const_iterator cend() const { return end_; }
+  iterator begin() { return this->begin_; }
+  const_iterator cbegin() const { return this->begin_;}
+  iterator end() { return this->end_; }
+  const_iterator cend() const { return this->end_; }
 
-  reverse_iterator rbegin() { return reverse_iterator(end_); }
-  const_reverse_iterator crbegin() const { return reverse_iterator(end_);}
-  reverse_iterator rend() { return reverse_iterator(begin_); }
-  const_reverse_iterator crend() const { return reverse_iterator(begin_); }
+  reverse_iterator rbegin() { return reverse_iterator(this->end_); }
+  const_reverse_iterator crbegin() const { return reverse_iterator(this->end_);}
+  reverse_iterator rend() { return reverse_iterator(this->begin_); }
+  const_reverse_iterator crend() const { return reverse_iterator(this->begin_); }
 
-  size_type size() const { return static_cast<size_type>(end_ - begin_); }
+  size_type size() const { return static_cast<size_type>(this->end_ - this->begin_); }
   size_type max_size() const { return std::numeric_limits<size_type>::max(); };
-  size_type capacity() const { return static_cast<size_type>(cap_ - begin_);}
-  bool empty() const { return begin_ == end_; }
+  size_type capacity() const { return static_cast<size_type>(this->cap_ - this->begin_);}
+  bool empty() const { return this->begin_ == this->end_; }
 
   void reserve(size_type n)
   {
@@ -117,7 +141,7 @@ class vector {
 
     if (n > this->capacity()){
       vector tmp(n/2);
-      std::copy(begin_, end_, tmp.begin_);
+      std::copy(this->begin_, this->end_, tmp.begin_);
       swap(*this, tmp);
     }
   }
@@ -126,21 +150,21 @@ class vector {
   {
     size_type n = this->size();
 
-    if(cap_ != end_) {
+    if(this->cap_ != this->end_) {
       auto nbuf = std::make_unique<value_type[]>(n);
-      std::copy(begin_, end_, &nbuf[0]);
+      std::copy(this->begin_, this->end_, &nbuf[0]);
 
-      auto tmp = buf_;
-      buf_ = nbuf.release();
+      auto tmp = this->buf_;
+      this->buf_ = nbuf.release();
       nbuf.reset(tmp);
 
-      begin_ = &buf_[0];
-      end_ = cap_ = &buf_[n];
+      this->begin_ = &this->buf_[0];
+      this->end_ = this->cap_ = &this->buf_[n];
     }
   }
 
-  reference operator[](size_type n) { return buf_[n]; }
-  const_reference operator[](size_type n) const { return buf_[n]; }
+  reference operator[](size_type n) { return this->buf_[n]; }
+  const_reference operator[](size_type n) const { return this->buf_[n]; }
 
   reference at(size_type pos)
   {
@@ -152,21 +176,21 @@ class vector {
 
   const_reference at(size_type pos) const { return at(pos); }
 
-  reference front() { return *begin_; }
-  const_reference front() const { return *begin_; }
-  reference back() { return *(end_ -1); }
-  const_reference back() const { return *(end_ - 1); }
+  reference front() { return *this->begin_; }
+  const_reference front() const { return *this->begin_; }
+  reference back() { return *(this->end_ -1); }
+  const_reference back() const { return *(this->end_ - 1); }
 
   void push_back(const value_type& v) { this->_push_back(v); }
 
   void push_back(value_type&& v) { this->_push_back(v); }
 
   void pop_back() {
-    (--end_)->~T();
+    (--this->end_)->~T();
   }
 
   void clear() {
-    while(begin_ != end_)
+    while(this->begin_ != this->end_)
       this->pop_back();
   }
 
@@ -180,19 +204,14 @@ class vector {
   }
 
  private:
-  pointer buf_ {nullptr};
-  pointer begin_ {nullptr};
-  pointer end_ {nullptr};
-  pointer cap_ {nullptr};
-
   template<typename ValueT>
   void _push_back(ValueT&& v)
   {
-    if (end_ != cap_) {
-      *end_ = v;
-      ++end_;
+    if (this->end_ != this->cap_) {
+      *this->end_ = v;
+      ++this->end_;
     } else {
-      vector tmp {begin_, end_};
+      vector tmp {this->begin_, this->end_};
       *tmp.end_ = v;
       ++tmp.end_;
 

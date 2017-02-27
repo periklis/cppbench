@@ -1,4 +1,5 @@
 #include <iostream>
+#include <initializer_list>
 #include "gtest/gtest.h"
 #include "vector.hpp"
 #include "vector_test_main.hpp"
@@ -87,7 +88,7 @@ TEST_P(vector_construct_with_size_test, vector_size_ctor) {
 INSTANTIATE_TEST_CASE_P(
     vector,
     vector_construct_with_size_test,
-    ::testing::Range(1, 10, 1));
+    ::testing::Range(0, 10, 1));
 
 
 
@@ -124,15 +125,9 @@ TEST_P(vector_construct_with_value_test, size_and_def_val_ctor) {
           (*vec)->begin(),
           (*vec)->end(),
           [val] (auto elem) { return elem == val; });
+
     }, &vec, vec_value);
 }
-
-
-
-/*
-  TESTS FOR COPY CONSTRUCTION
- */
-
 
 TEST_P(vector_construct_with_value_test, vector_copy_ctor) {
   auto vec_copy(*vec);
@@ -157,10 +152,6 @@ TEST_P(vector_construct_with_value_test, vector_copy_assigment) {
       return std::equal(lhs.begin(), lhs.end(), (*rhs)->begin());
     }, vec_copy, &vec);
 }
-
-/*
-  TESTS FOR COPY CONSTRUCTION
- */
 
 TEST_P(vector_construct_with_value_test, vector_move_ctor) {
   auto vec_moved_to(std::move(*vec));
@@ -205,7 +196,7 @@ TEST_P(vector_construct_with_value_test, vector_move_assigment) {
 TEST_P(vector_construct_with_value_test, vector_move_with_swap_by_adl) {
   using std::swap;
 
-  cppbench::containers::vector<int> vc {vec_size, vec_value};
+  cppbench::containers::vector<int> vc (vec_size, vec_value);
   swap(vc, *vec);
 
   EXPECT_EQ(vec_size, vec->size());
@@ -223,3 +214,30 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Combine(
          ::testing::Range(1, 10, 1),
          ::testing::Values(10)));
+
+
+class vector_construct_with_initializer_list_test
+    : public ::testing::Test {
+
+ public:
+  vector_construct_with_initializer_list_test() {
+
+    vec = new cppbench::containers::vector<int>{{1,2,3}};
+  }
+
+  ~vector_construct_with_initializer_list_test() {
+    delete vec;
+    vec = nullptr;
+  }
+
+  cppbench::containers::vector<int>* vec;
+};
+
+
+TEST_F(vector_construct_with_initializer_list_test, vector_initializer_list_test)
+{
+  EXPECT_EQ(3, vec->size());
+  EXPECT_EQ(1, (*vec)[0]);
+  EXPECT_EQ(2, (*vec)[1]);
+  EXPECT_EQ(3, (*vec)[2]);
+}

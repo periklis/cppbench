@@ -20,14 +20,6 @@ class vector_invariants_test :
   cppbench::containers::vector<int>* vec;
 };
 
-TEST_P(vector_invariants_test, vector_explicit_ctor)
-{
-  for (typename cppbench::containers::vector<int>::size_type i = 0;
-       i < vec_size; ++i) {
-    EXPECT_EQ(vec_value, (*vec)[i]);
-  }
-}
-
 TEST_P(vector_invariants_test, vector_begin_iter)
 {
   EXPECT_EQ(vec_value, *vec->begin());

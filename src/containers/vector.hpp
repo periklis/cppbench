@@ -6,17 +6,90 @@
 #include <iterator>
 
 /*
- * TODO: Separate allocation policy between stack and free store through extra type parameter
+ * TODO: Review iterator invalidation requirements.
+ * TODO: Add SFINAE for constructor overloads
+ * TODO: Implement clear, resize
  * TODO: Implement insert, emplace, erase
  */
 namespace cppbench {
 namespace containers {
 
+/*
+  Rationale and design of a C++11 concept-conforming vector container
+
+  I. Requirements
+
+  Implement a vector following closely the STL std::vector<T> API (See
+  http://en.cppreference.com/w/cpp/container/vector) without
+  allocators and specialization for bool type.
+
+  This results into following requirements:
+  - C++11 minimum required for API and implementation
+
+  - Contiguous storage of a dynamic sized array of data of type T
+
+  - Random access operations O(1)
+
+  - Insertion/Removal at the end in amortized constant O(1)
+
+  - Insertion/removal of elements linear in distance to the end of the
+    vector O(n)
+
+  - Container meets concepts: Container, SequenceContainer ,
+    ContiguousContainer and ReversibleContainer.
+
+  - Type T of vector element meets concepts: CopyAssignable,
+    CopyConstructible, Erasable (Ops may impose stricter requirements)
+
+
+  II. Design decisions
+
+  - No usage of size_t or any unsigned built-in type for size-type to
+    mitigate bugs using our API with signed built-in types.
+
+  - Template parameter independent code is extracted into a derived
+    class to minimize code size.
+
+  - Provide public typedefs according to container concepts types (See
+    http://en.cppreference.com/w/cpp/concept/Container)
+
+  - Provide sequence container operations for construction,
+    emplacement, insertion, erasure, assignment, subscript access and
+    bound-checked access. (See
+    http://en.cppreference.com/w/cpp/concept/SequenceContainer)
+
+  - Provide size and capacity management and inquiry.
+
+  - Provide strong exception safety guarantee for copy, assignment,
+    move and insertion.
+
+  - Provide efficient non-throwing swap fiend member function for ADL.
+
+  - Provide iterators and their reverse counterparts with following
+    invalidation guarantees:
+    a. Insertion: No inv. before insertion point, except on capacity excess.
+    b. Erasure: All iterators are invalidated after the point of erasure.
+    c. Resize: Same as Insert/erase.
+    d. Swap: No invalidation of any references or iterators.
+
+  - Protection for constructor overloading for non-built-in type
+    arguments. (e.g. construction by input iterator pair)
+
+  III. sDifferences to STL std::vector<T>
+
+  - No usage of allocators, direct dynamic array management on free store.
+
+  - No debugging facility for iterators and invariants.
+
+  - No ASAN support.
+
+ */
 template<typename T>
 class vector_base  {
  public:
   typedef T              value_type;
   typedef int            size_type;
+  typedef int            difference_type;
   typedef T&             reference;
   typedef const T&       const_reference;
   typedef T*             iterator;
@@ -68,6 +141,7 @@ class vector
   typedef typename vector_base::reference       reference;
   typedef typename vector_base::const_reference const_reference;
   typedef typename vector_base::size_type       size_type;
+  typedef typename vector_base::difference_type difference_type;
   typedef typename vector_base::iterator        iterator;
   typedef typename vector_base::const_iterator  const_iterator;
   typedef std::reverse_iterator<iterator>       reverse_iterator;

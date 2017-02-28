@@ -120,8 +120,10 @@ class vector
   }
 
   iterator begin() { return this->begin_; }
+  const_iterator begin() const { return this->begin_; }
   const_iterator cbegin() const { return this->begin_;}
   iterator end() { return this->end_; }
+  const_iterator end() const { return this->end_; }
   const_iterator cend() const { return this->end_; }
 
   reverse_iterator rbegin() { return reverse_iterator(this->end_); }
@@ -224,6 +226,44 @@ template<typename T>
 std::ostream& operator<<(std::ostream& os, const vector<T>& v) {
   std::copy(v.cbegin(), v.cend(), std::ostream_iterator<T>(os, ", "));
   return os;
+}
+
+template<typename T>
+inline bool operator==(const vector<T>& lhs, const vector<T>& rhs)
+{
+  return lhs.size() == rhs.size() &&
+      std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+}
+
+template<typename T>
+inline bool operator!=(const vector<T>& lhs, const vector<T>& rhs)
+{
+  return !(lhs == rhs);
+}
+
+template<typename T>
+inline bool operator<(const vector<T>& lhs, const vector<T>& rhs)
+{
+  return std::lexicographical_compare(
+      lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+}
+
+template<typename T>
+inline bool operator<=(const vector<T>& lhs, const vector<T>& rhs)
+{
+  return !(rhs < lhs);
+}
+
+template<typename T>
+inline bool operator>(const vector<T>& lhs, const vector<T>& rhs)
+{
+  return rhs < lhs;
+}
+
+template<typename T>
+inline bool operator>=(const vector<T>& lhs, const vector<T>& rhs)
+{
+  return !(lhs < rhs);
 }
 
 } // namespace containers

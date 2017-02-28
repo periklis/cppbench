@@ -106,7 +106,8 @@ class vector
 
   vector& operator=(vector v)
   {
-    swap(*this, v);
+    if (this != v)
+      swap(*this, v);
 
     return *this;
   }

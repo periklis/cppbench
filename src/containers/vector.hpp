@@ -8,7 +8,7 @@
 /*
  * TODO: Review iterator invalidation requirements.
  * TODO: Add SFINAE for constructor overloads
- * TODO: Implement clear, resize
+ * TODO: Implement resize
  * TODO: Implement insert, emplace, erase
  */
 namespace cppbench {
@@ -75,7 +75,7 @@ namespace containers {
   - Protection for constructor overloading for non-built-in type
     arguments. (e.g. construction by input iterator pair)
 
-  III. sDifferences to STL std::vector<T>
+  III. Differences to STL std::vector<T>
 
   - No usage of allocators, direct dynamic array management on free store.
 

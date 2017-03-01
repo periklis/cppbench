@@ -8,8 +8,7 @@
 /*
  * TODO: Review iterator invalidation requirements.
  * TODO: Add SFINAE for constructor overloads
- * TODO: Implement resize
- * TODO: Implement insert, emplace, erase
+ * TODO: Implement emplace, erase
  */
 namespace cppbench {
 namespace containers {
@@ -264,6 +263,86 @@ class vector
 
   void pop_back() {
     (--this->end_)->~T();
+  }
+
+  iterator insert(size_type pos, const value_type& v)
+  {
+    return this->insert(pos, 1, v);
+  }
+
+  iterator insert(size_type pos, value_type&& v)
+  {
+    return this->insert(pos, 1, v);
+  }
+
+  iterator insert(size_type pos, size_type n, const value_type& v)
+  {
+    if (!(pos < this->size()))
+      throw std::out_of_range("Position out of range");
+
+    auto new_size = this->size() + n;
+    if (new_size >= this->capacity()) {
+      this->resize(new_size);
+    }
+
+    auto insert_pos = this->begin_ + pos;
+    vector past_pos_elems {insert_pos, this->end_};
+
+    for(size_type i = 0; i < n; ++i)
+      *(insert_pos + i) = value_type{v};
+
+    std::copy(past_pos_elems.begin_, past_pos_elems.end_,
+              (insert_pos + n));
+
+    this->end_ = this->begin_ + new_size;
+
+    return this->begin_ + pos;
+  }
+
+  iterator insert(size_type pos, const_iterator b, const_iterator e)
+  {
+    if (!(pos < this->size()))
+      throw std::out_of_range("Position out of range!");
+
+    if(b > e)
+      throw std::range_error("Not valid input range!");
+
+    auto distance = std::distance(b, e);
+    auto new_size = this->size() + distance;
+    if (new_size >= this->capacity()) {
+      this->resize(new_size);
+    }
+
+    auto insert_pos = this->begin_ + pos;
+    vector past_pos_elems {insert_pos, this->end_};
+
+    for(auto i = 0; i < distance; ++i)
+      *(insert_pos + i) = *(b + i);
+
+    std::copy(past_pos_elems.begin(), past_pos_elems.end(),
+              (insert_pos + distance));
+
+    this->end_ = this->begin_ + new_size;
+
+    return this->begin_ + pos;
+  }
+
+  iterator insert(size_type pos, std::initializer_list<T> il)
+  {
+    return this->insert(pos, il.begin(), il.end());
+  }
+
+  void resize(size_type count)
+  {
+    if (count > this->size()) {
+      vector tmp(count);
+      std::copy(this->begin_, this->end_, tmp.begin_);
+      swap(*this, tmp);
+    } else if(count < this->size()) {
+      vector tmp(count);
+      std::copy(this->begin_, this->begin_ + count, tmp.begin_);
+      swap(*this, tmp);
+    }
   }
 
   void clear() {

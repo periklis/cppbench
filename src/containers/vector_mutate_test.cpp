@@ -10,7 +10,7 @@ class vector_mutate_test
     vec_size = ::testing::get<0>(GetParam());
     vec_value = ::testing::get<1>(GetParam());
     vec = new cppbench::containers::vector<int>(vec_size, vec_value);
-    std::generate_n(vec->begin(), vec_size, std::rand);
+    // std::generate_n(vec->begin(), vec_size, std::rand);
   }
 
   virtual ~vector_mutate_test() {
@@ -59,6 +59,59 @@ TEST_P(vector_mutate_test, vector_pop_back) {
   EXPECT_EQ(vec_size - 1, vec->size());
 }
 
+TEST_P(vector_mutate_test, vector_insert_at_pos_copy_lvalue) {
+  auto new_pos = vec_size > 2 ? 1 : 0;
+  auto new_val = vec_value + 1;
+  auto iter_new_val = vec->insert(new_pos, new_val);
+
+  EXPECT_EQ(vec_size + 1, vec->size());
+  EXPECT_EQ(new_val, (*vec)[new_pos]);
+  EXPECT_EQ(new_val, *iter_new_val);
+}
+
+TEST_P(vector_mutate_test, vector_insert_at_pos_rvalue) {
+  auto new_pos = vec_size > 2 ? 1 : 0;
+  auto new_val = vec_value + 1;
+  auto iter_new_val = vec->insert(new_pos, std::move(new_val));
+
+  EXPECT_EQ(vec_size + 1, vec->size());
+  EXPECT_EQ(new_val, (*vec)[new_pos]);
+  EXPECT_EQ(new_val, *iter_new_val);
+}
+
+TEST_P(vector_mutate_test, vector_insert_n_times_at_pos_lvalue) {
+  auto new_n = 3;
+  auto new_start_pos = vec_size > 2 ? 1 : 0;
+  auto new_end_pos = new_start_pos + new_n - 1;
+  auto new_val = vec_value + 1;
+
+  vec->insert(new_start_pos, new_n, std::move(new_val));
+
+  EXPECT_EQ(vec_size + new_n, vec->size());
+  EXPECT_PRED4([] (auto vec, auto start_pos, auto end_pos, auto new_val) {
+      return std::all_of(
+          (*vec)->begin() + start_pos,
+          (*vec)->begin() + end_pos,
+          [new_val] (auto elem) { return elem == new_val; });
+    }, &vec, new_start_pos, new_end_pos,  new_val);
+}
+
+TEST_P(vector_mutate_test, vector_insert_by_iters) {
+  auto list = {1,2,3,4};
+  auto new_n = list.size();
+  auto new_start_pos = vec_size > 2 ? 1 : 0;
+  auto new_end_pos = new_start_pos + new_n;
+
+  vec->insert(new_start_pos, list.begin(), list.end());
+
+  EXPECT_EQ(vec_size + new_n, vec->size());
+  EXPECT_PRED3([&list] (auto vec, auto start_pos, auto end_pos) {
+      return std::equal((*vec)->begin() + start_pos, (*vec)->begin() + end_pos,
+                        list.begin(), list.end());
+    }, &vec, new_start_pos, new_end_pos);
+}
+
+
 TEST_P(vector_mutate_test, vector_clear) {
   auto init_cap = vec->capacity();
   vec->clear();
@@ -76,6 +129,36 @@ TEST_P(vector_mutate_test, vector_reserve) {
 TEST_P(vector_mutate_test, vector_reserve_above_max_size) {
   typedef typename cppbench::containers::vector<int>::size_type sizeT;
   EXPECT_THROW(vec->reserve(std::numeric_limits<sizeT>::max()+1), std::length_error);
+}
+
+TEST_P(vector_mutate_test, vector_resize_bigger_size) {
+  auto new_size = vec_size + 1;
+  vec->resize(new_size);
+
+  EXPECT_EQ(new_size, vec->size());
+
+  EXPECT_PRED3([] (auto vec, auto old_size, auto val) {
+      return std::all_of(
+          (*vec)->begin(),
+          (*vec)->begin() + old_size,
+          [val] (auto elem) { return elem == val; });
+    }, &vec, vec_size, vec_value);
+
+  EXPECT_EQ(0, (*vec)[vec_size]);
+}
+
+TEST_P(vector_mutate_test, vector_resize_lesser_size) {
+  auto new_size = vec_size > 1 ? vec_size - 1 : 1;
+  vec->resize(new_size);
+
+  EXPECT_EQ(new_size, vec->size());
+
+  EXPECT_PRED2([] (auto vec, auto val) {
+      return std::all_of(
+          (*vec)->begin(),
+          (*vec)->end(),
+          [val] (auto elem) { return elem == val; });
+    }, &vec, vec_value);
 }
 
 TEST_P(vector_mutate_test, vector_shrink_to_fit) {

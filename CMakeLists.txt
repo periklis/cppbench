@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 3.2 FATAL_ERROR)
 project (CPPBench LANGUAGES CXX)
 
+set(CMAKE_CXX_FLAGS_DEBUG "-ggdb -O0")
+
 enable_testing()
 
 add_subdirectory("${PROJECT_SOURCE_DIR}/lib")

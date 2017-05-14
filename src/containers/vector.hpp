@@ -171,7 +171,7 @@ class vector
     std::copy(v.begin_, v.end_, this->begin_);
   }
 
-  vector(vector&& v)
+  vector(vector&& v) noexcept
       : vector()
   {
     swap(*this, v);
@@ -185,7 +185,7 @@ class vector
     return *this;
   }
 
-  vector& operator=(vector&& v)
+  vector& operator=(vector&& v) noexcept
   {
     vector tmp(v);
     swap(*this, tmp);

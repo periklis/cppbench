@@ -10,7 +10,6 @@ class vector_mutate_test
     vec_size = ::testing::get<0>(GetParam());
     vec_value = ::testing::get<1>(GetParam());
     vec = new cppbench::containers::vector<int>(vec_size, vec_value);
-    // std::generate_n(vec->begin(), vec_size, std::rand);
   }
 
   virtual ~vector_mutate_test() {

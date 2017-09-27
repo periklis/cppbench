@@ -1,10 +1,9 @@
 let
   nixpkgs = import <nixpkgs> {};
-  allpkgs = nixpkgs // pkgs;
 
   pkgs = with nixpkgs; {
     cppbench = callPackage ({
-      stdenv, lib, autoconf, automake, gnumake, cmake, llvmPackages_39, boost
+      stdenv, lib, autoconf, automake, gnumake, cmake, clangStdenv, libcxxStdenv, boost
     }:
     stdenv.mkDerivation rec {
       name = "cppbench-env";
@@ -17,10 +16,18 @@ let
         cmake
         gdb
         gnumake
-        llvmPackages_39.clang
-        llvmPackages_39.libcxx
-        llvmPackages_39.libcxxabi
-     ];
-  }) {};
-};
+        clangStdenv
+        libcxxStdenv
+      ];
+
+      buildConstants = ["Contant 1" "Constant 2"];
+
+      shellHook = ''
+        cd build
+        make
+        ctest
+      '';
+
+    }) { /* Put your overrides here */ };
+  };
 in pkgs
